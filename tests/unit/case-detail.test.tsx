@@ -81,4 +81,20 @@ describe("CaseDetail", () => {
     render(wrap(<CaseDetail caseId="case-1" />));
     expect(screen.getByText("Aberto automaticamente")).toBeInTheDocument();
   });
+
+  it("mostra o erro e permite tentar novamente em vez de carregar para sempre", () => {
+    const refetch = vi.fn();
+    useCaseMock.mockReturnValue({
+      isLoading: false,
+      isFetching: false,
+      isError: true,
+      data: undefined,
+      refetch,
+    });
+
+    render(wrap(<CaseDetail caseId="case-1" />));
+    expect(screen.getByText("Não foi possível abrir este caso")).toBeInTheDocument();
+    screen.getByRole("button", { name: "Tentar novamente" }).click();
+    expect(refetch).toHaveBeenCalledOnce();
+  });
 });

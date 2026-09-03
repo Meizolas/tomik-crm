@@ -3,13 +3,14 @@ import { formatDistanceToNowStrict } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useCase } from "@/hooks/ai/useCases";
 import { STATUS_BADGE_VARIANT, STATUS_LABEL, caseEventLabel } from "@/lib/ai/case-copy";
 import { CaseReplyPanel } from "./CaseReplyPanel";
 
 export function CaseDetail({ caseId }: { caseId: string | null }) {
-  const { data, isLoading } = useCase(caseId);
+  const { data, isLoading, isError, refetch, isFetching } = useCase(caseId);
 
   if (caseId === null) {
     return (
@@ -20,12 +21,28 @@ export function CaseDetail({ caseId }: { caseId: string | null }) {
     );
   }
 
-  if (isLoading || !data) {
+  if (isLoading) {
     return (
       <div className="space-y-3">
         <Skeleton className="h-8 w-2/3" />
         <Skeleton className="h-24 w-full" />
         <Skeleton className="h-24 w-full" />
+      </div>
+    );
+  }
+
+  if (isError || !data) {
+    return (
+      <div className="flex h-full flex-col items-center justify-center gap-3 py-16 text-center">
+        <div>
+          <p className="text-sm font-medium">Não foi possível abrir este caso</p>
+          <p className="mt-1 text-xs text-muted-foreground">
+            O caso pode ter sido atualizado ou ocorreu uma falha ao carregar os detalhes.
+          </p>
+        </div>
+        <Button variant="outline" size="sm" disabled={isFetching} onClick={() => void refetch()}>
+          {isFetching ? "Tentando novamente…" : "Tentar novamente"}
+        </Button>
       </div>
     );
   }
